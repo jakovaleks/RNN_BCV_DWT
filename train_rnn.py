@@ -209,7 +209,6 @@ class rnn_trainer:
                         loss_iter.append(rmse_val.tolist())
                         
                     self.loss_val.append(np.mean(loss_iter))
-                    print(f'Training block {block + 1}/{self.num_training_blocks}, iter {i + 1}:\t Training loss: {self.loss_trn[-1]:.4f}\t Validation loss: {self.loss_val[-1]:.4f}')
                 
                 # Increment total_iters by 1 (used for performance plotting)
                 self.total_iters += 1
@@ -220,7 +219,10 @@ class rnn_trainer:
                 # If the last iteration had the minimum validation loss,
                 # save it as self.best_mdl
                 if block_min_val == self.loss_val[-1]:
-                    self.best_mdl = self.mdl
+                    self.best_mdl.load_state_dict(self.mdl.state_dict())
+                    print(f'Training block {block + 1}/{self.num_training_blocks}, iter {i + 1}:\t Training loss: {self.loss_trn[-1]:.4f}\t Validation loss: {self.loss_val[-1]:.4f} <---')
+                else :
+                    print(f'Training block {block + 1}/{self.num_training_blocks}, iter {i + 1}:\t Training loss: {self.loss_trn[-1]:.4f}\t Validation loss: {self.loss_val[-1]:.4f}')
                     
                 # Check to see if max_iters_increasing_validation_loss has
                 # been exceeded (i.e. the minimum validation loss in the block
@@ -245,7 +247,7 @@ class rnn_trainer:
             
             # Load self.best_mdl (lowest validation loss on final iteration)
             # as self.mdl and compute test set performance
-            self.mdl = self.best_mdl
+            self.mdl.load_state_dict(self.best_mdl.state_dict())
             self.test(block)
         
         # Record the final training time and rmse
